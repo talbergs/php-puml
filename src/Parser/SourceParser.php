@@ -49,6 +49,7 @@ class SourceParser
         $this->interfaces = new Stack();
         $this->controlStructure = new Stack();
         $this->file = new PhpFile();
+        ini_set('memory_limit', '4G');
         $tokens = token_get_all($phpSourceCode);
         foreach ($tokens as $id => $token) {
             switch ($token[0]) {
@@ -215,6 +216,10 @@ class SourceParser
     {
         if ($this->classes->isEmpty() === true) {
             $useToken = new UseToken($id, $tokens);
+            if ($useToken->fullName() === '') {
+                return;
+            }
+
             $this->file->appendUsedClass(
                 [
                     'name' => $useToken->parts()->peek(),
