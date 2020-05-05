@@ -325,4 +325,39 @@ EOT
             ], $functionToken->params());
         }
     }
+
+    public function testCanParseReferenceParameter(): void
+    {
+        $tokens = token_get_all(
+            <<<EOT
+<?php
+class Foo
+{
+    public function test(array &\$variable = null, bool \$booleanVar = true)
+    {
+        return \$variable;
+    }
+}
+EOT
+        );
+        $functionToken = null;
+        foreach ($tokens as $id => $value) {
+            if ($value[0] === T_FUNCTION) {
+                $functionToken = new FunctionToken($id, $tokens);
+            }
+        }
+        if ($functionToken !== null) {
+            $this->assertEquals("test", $functionToken->functionName());
+            $this->assertEquals([
+                [
+                    'type' => '&array',
+                    'variable' => '$variable'
+                ],
+                [
+                    'type' => 'bool',
+                    'variable' => '$booleanVar'
+                ]
+            ], $functionToken->params());
+        }
+    }
 }

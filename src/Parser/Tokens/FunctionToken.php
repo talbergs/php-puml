@@ -42,18 +42,23 @@ class FunctionToken extends AbstractToken
         if ($this->params === null) {
             $i = 4;
             do {
+                $ref = '';
                 $next = $this->tokens[$this->id + $i];
                 if ($next[0] === T_STRING || $next[0] === T_ARRAY) {
                     if (in_array($next[1], self::$DEFAULT_VALUE_FOR_TYPES, true) === false) {
+                        if ($this->tokens[$this->id + $i + 2] === "&") {
+                            $ref = '&';
+                            $i ++;
+                        }
                         if ($this->tokens[$this->id + $i + 2][1] === "...") {
                             $this->params[] = [
-                                'type' => $next[1]."[]",
+                                'type' => $ref.$next[1]."[]",
                                 'variable' => $this->tokens[$this->id + $i + 3][1] ?? "bugs"
                             ];
                             $i += 3;
                         } else {
                             $this->params[] = [
-                                'type' => $next[1],
+                                'type' => $ref.$next[1],
                                 'variable' => $this->tokens[$this->id + $i + 2][1]
                             ];
                             $i += 2;
@@ -62,7 +67,7 @@ class FunctionToken extends AbstractToken
                 }
                 if ($next[0] === T_VARIABLE) {
                     $this->params[] = [
-                        'type' => 'mixed',
+                        'type' => $ref.'mixed',
                         'variable' => $next[1]
                     ];
                 }
